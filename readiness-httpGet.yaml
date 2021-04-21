@@ -1,0 +1,25 @@
+#kubectl exec pod/pod_name -n dev -- curl -s -X POST -d 'readyz=FAIL' 127.0.0.1/readyz
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readiness-httpget
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  restartPolicy: Always
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    readinessProbe:
+      httpGet:
+        path: '/readyz'
+        port: 80
+        scheme: HTTP
+      initialDelaySeconds: 15
+      periodSeconds: 5
+      timeoutSeconds: 2
+      failureThreshold: 3
