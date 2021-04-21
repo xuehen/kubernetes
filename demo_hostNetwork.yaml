@@ -1,0 +1,27 @@
+#pod共享工作节点的网络名称空间--hostNetwork
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapp
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      hostNetwork: true
+      #pod中的进程直接监听工作节点的IP地址和端口
+      restartPolicy: Always
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        imagePullPolicy: IfNotPresent
