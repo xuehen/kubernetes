@@ -1,0 +1,24 @@
+#httpGet--向目标容器发起一个get请求,根据其响应码进行结果判定,2xx或者3xx,表示检测通过
+#curl -s -X POST -d 'livez=FAIL' 127.0.0.1/livez
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-exec-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      httpGet:
+        path: '/livez'
+        port: 80
+        scheme: HTTP
+        #scheme:建立连接使用的协议,仅可为http/https,默认http
+      initialDelaySeconds: 5
+      #存活探测的频度默认10s
