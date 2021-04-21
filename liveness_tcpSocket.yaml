@@ -1,0 +1,38 @@
+#向pod的80端口发起连接请求,根据连接状态判定测试结果
+#为了能够在容器中通过iptables阻止接收对80端口的请求以验证TCP检测失败,启用内核权限NET_ADMIN,重启容器并不会导致pod资源的重启操作，
+#网络名称空间的设定附加在pause容器之上,因而添加的iptables规则在应用重启后依然存在,它无法通过重启解决,除非清理掉iptables规则
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-tcpsocket-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: nginx
+      containerPort: 80
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+    livenessProbe:
+      tcpSocket:
+        port: nginx
+      initialDelaySeconds: 20
+      periodSeconds: 5
+           
+# curl pod_ip
+#iKubernetes demoapp v1.0 !! ClientIP: 10.244.0.0, ServerName: liveness-tcpsocket-demo, ServerIP: 10.244.1.132!
+# kubectl exec liveness-tcpsocket-demo -n dev -- iptables -A INPUT -p tcp --dport 80 -j REJECT
+# curl 10.244.1.132
+#curl: (7) Failed connect to 10.244.1.132:80; Connection refused
+# kubectl exec liveness-tcpsocket-demo -n dev -- iptables -D  INPUT 1
+# curl 10.244.1.132
+#iKubernetes demoapp v1.0 !! ClientIP: 10.244.0.0, ServerName: liveness-tcpsocket-demo, ServerIP: 10.244.1.132!
