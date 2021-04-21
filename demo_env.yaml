@@ -1,0 +1,29 @@
+#容器的环境变量
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapp
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: PORT
+        #端口由80改为8888,需要引号包含
+          value: "8888"
