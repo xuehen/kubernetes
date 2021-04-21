@@ -1,0 +1,24 @@
+#在容器中执行自定义命令，通过命令状态返回值来判断容器的健康状态（0:成功,非0失败）
+#curl -s -X POST -d 'livez=FAIL'  127.0.0.1/livez
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-exec-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -c
+        - '[ "$(curl -s 127.0.0.1/livez)" == "OK" ]'
+      initialDelaySeconds: 5
+      periodSeconds: 5
