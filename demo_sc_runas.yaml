@@ -1,0 +1,31 @@
+#管理容器进程运行的身份--uid/gid
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-runasuser-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        imagePullPolicy: IfNotPresent
+        #非特权用户默认无法使用1024以下的端口,故通过环境变量改变监听端口
+        env:
+        - name: PORT
+          value: "8080"
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
