@@ -1,0 +1,28 @@
+#管理容器的内核功能
+#容器中的root用户将默认映射为系统上的普通用户,实际上并不具有管理网络接口,iptables规则和路由表等相关的权限,内核功能NET_ADMIN可以其开放此类权限
+apiVersion: v1
+kind: Pod
+metadata:
+  name: securitycontext-capabilities-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    args:
+    - /sbin/iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80  && /usr/bin/python3 /usr/local/bin/demo.py
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+        drop:
+          - CHOWN
+
