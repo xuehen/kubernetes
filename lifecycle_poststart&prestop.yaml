@@ -1,0 +1,43 @@
+#iptables(filter,nat,manle,raw默认filter表)
+#iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 80 
+#iptables -t nat -nL --line-number
+#iptables -D $number
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  restartPolicy: Always
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+    livenessProbe:
+    #对pod的URL进行http get请求,根据其状态码和内容来判断
+      httpGet:
+        path: '/livez'
+        port: 80
+        scheme: HTTP
+      initialDelaySeconds: 5
+    lifecycle:
+      postStart:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+      preStop:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - while killall python3; do sleep 1; done
