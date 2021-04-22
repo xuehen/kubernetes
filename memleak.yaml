@@ -1,0 +1,22 @@
+#模拟内存泄漏,不断申请内存资源，而超出limits字段而被OMM
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memleak-demo
+  namespace: dev
+  labels:
+    app: memleak
+  annotations:
+    author: xiaojie.bai
+spec:
+  containers:
+  - name: simmemleak
+    image: ikubernetes/simmemleak
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "1"
+      limits:
+        memory: "64Mi"
+        cpu: "1"
