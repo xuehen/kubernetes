@@ -1,0 +1,55 @@
+#初始化容器和postStop钩子都可以完成特定的初始化操作，但postStop必须在应用容器内部完成，如管理权限也必须为应用容器所有，会对应用容器引入安全风险，
+#初始化容器推荐使用
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-container-demo
+  namespace: dev
+  labels:
+    app: nginx
+  annotations:
+    author: xiaojie.bai
+spec:
+  restartPolicy: Always
+  initContainers:
+  - name: iptables-init
+    image: ikubernetes/admin-box:latest
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http
+      containerPort: 80
+    #securityContext:
+    #  capabilities:
+    #    add:
+    #      - NET_ADMIN
+    #livenessProbe:
+    #  httpGet:
+    #    path: '/livez'
+    #    port: 80
+    #    scheme: HTTP
+    #  initialDelaySeconds: 5
+    #lifecycle:
+    #  postStart:
+    #    exec:
+    #      command:
+    #      - /bin/sh
+    #      - -c
+    #     - iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+    #  preStop:
+    #    exec:
+    #      command:
+    #      - /bin/sh
+    #      - -c
+    #      - while killall python3; do sleep 1; done
