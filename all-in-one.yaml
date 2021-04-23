@@ -1,4 +1,3 @@
-#解析有问题wget -O /etc/envoy/envoy.yaml https://raw.githubusercontent.com/iKubernetes/Kubernetes_Advanced_Practical_2rd/master/chapter4/envoy.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -25,7 +24,7 @@ spec:
     - /bin/sh
     - -c
     args:
-    - sleep 3 && envoy -c /etc/envoy/envoy.yaml
+    - echo 185.199.108.133 raw.githubusercontent.com >> /etc/hosts  && sleep 3 && envoy -c /etc/envoy/envoy.yaml
     lifecycle:
       postStart:
         exec:
