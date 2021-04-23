@@ -1,4 +1,4 @@
-#对proxy容器的80端口发起请求,是否可以将流量代理转发问到demoapp容器的80端口
+#对proxy容器的80端口发起请求,是否可以将流量代理转发问到demoapp容器的8080端口
 apiVersion: v1
 kind: Pod
 metadata:
