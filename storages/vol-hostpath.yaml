@@ -1,0 +1,69 @@
+#容器中的filebeat进程负责收集工作节点和容器相关的日志信息并发往redis服务器
+apiVersion: v1
+kind: Pod
+metadata:
+   name: vol-hostpath-pod
+   namespace: dev
+spec:
+  containers:
+  - name: filebeat
+    image: ikubernetes/filebeat:5.6.7-alpine
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: REDIS_HOST
+      value: 172.20.18.81:6379
+    - name: LOG_LEVEL
+      value: info
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+    - name: socket
+      mountPath: /var/run/docker.socker
+    - name: varlibdockercontainers
+      mountPath: /var/lib/docker/containers
+      readOnly: true
+  terminationGracePeriodSeconds: 30
+  volumes:
+  - name: varlog
+    hostPath:
+      path: /var/log
+  - name: socket
+    hostPath:
+      path: /var/run/docker.socker
+  - name: varlibdockercontainers
+    hostPath:
+      path:  /var/lib/docker/containers
+#附件filebeat.yaml
+ # cat filebeat.yml
+filebeat.registry_file: /var/log/containers/filebeat_registry
+filebeat.idle_timeout: 5s
+filebeat.spool_size: 2048
+
+logging.level: info
+
+filebeat.prospectors:
+- input_type: log
+  paths:
+    - "/var/log/containers/*.log"
+    - "/var/log/docker/containers/*.log"
+    - "/var/log/startupscript.log"
+    - "/var/log/kubelet.log"
+    - "/var/log/kube-proxy.log"
+    - "/var/log/kube-apiserver.log"
+    - "/var/log/kube-controller-manager.log"
+    - "/var/log/kube-scheduler.log"
+    - "/var/log/rescheduler.log"
+    - "/var/log/glbc.log"
+    - "/var/log/cluster-autoscaler.log"
+  symlinks: true
+  json.message_key: log
+  json.keys_under_root: true
+  json.add_error_key: true
+  multiline.pattern: '^\s'
+  multiline.match: after
+  document_type: kube-logs
+  tail_files: true
+  fields_under_root: true
+
+output.redis:
+  hosts: ${REDIS_HOST:?No Redis host configured. Use env var REDIS_HOST to set host.}
