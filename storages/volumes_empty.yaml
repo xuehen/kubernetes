@@ -1,4 +1,4 @@
-
+#实例-
 apiVersion: v1
 kind: Pod
 metadata:
@@ -34,3 +34,32 @@ spec:
     emptyDir:
       medium: Memory
       sizeLimit: 16Mi
+#实例二
+apiVersion: v1
+kind: Pod
+metadata:
+  name: share-demo
+  namespace: dev
+spec:
+  initContainers:
+  - name: write
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    args:
+    - echo Share-data >> /empty/index.html
+    volumeMounts:
+    - name: html
+      mountPath: /empty/
+  containers:
+  - name: read
+    image: ikubernetes/myapp:v1
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html/
+  volumes:
+  - name: html
+    emptyDir: {}
