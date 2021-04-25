@@ -1,4 +1,4 @@
-#容器中的filebeat进程负责收集工作节点和容器相关的日志信息并发往redis服务器进行存储,日志内容不会输出（ELF）
+#容器中的filebeat进程负责收集工作节点和容器相关的日志信息并发往redis服务器进行存储,日志内容不会输出进行展示（ELF）
 apiVersion: v1
 kind: Pod
 metadata:
