@@ -36,7 +36,7 @@ spec:
 #metadata.namespace
 #metadata.labels
 #metadata.annotitions
-#spec.podName
+#spec.nodeName
 #spec.serviceAccountName
 #status.podIP
 #status.hostIP
