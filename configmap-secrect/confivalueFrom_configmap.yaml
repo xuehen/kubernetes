@@ -1,0 +1,44 @@
+#pod通过环境变量引用configmap中的值
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podrefconfigmap
+  namespace: dev
+spec:
+  containers:
+  - name: configmap-pod-map
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: nginx-spec
+      valueFrom:
+        configMapKeyRef:
+          key: nginx.conf
+          name: nginx-conf
+    - name: NAME
+      value: xiaojie.bai
+    - name:  port_demo-app
+      valueFrom:
+        configMapKeyRef:
+          name: demo-app
+          key: demoapp.host
+
+
+#kubectl create configmap demo-app --from-literal=demoapp.host=127.0.0.1 --from-literal=demoapp.port=80 -n dev
+#kubectl create configmap nginx-conf --from-file=./nginx.confg -n dev
+#kubectl create configmap nginx-conf --from-file=./nginx-conf.d/ -n dev
+#####
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-demo
+  namespace: dev
+data:
+  host: 0.0.0.0
+  port: "10080"
+  app.config: |
+    threads = 4
+    connections = 1024
+
+
+
