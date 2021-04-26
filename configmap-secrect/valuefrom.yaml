@@ -1,1 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: envfrom-demo
+  namespace: dev
+spec:
+  containers:
+  - name: envfrom-containe
+    image: busybox
+    command:
+    - httpd
+    args:
+    - -f
+    env:
+    - name: HELLO_WORLD
+      value:  just a demo
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: MY_NODE_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+  restartPolicy: OnFailure
+##fieldRef###
+#metadata.name
+#metadata.namespace
+#metadata.labels
+#metadata.annotitions
+#spec.podName
+#spec.serviceAccountName
+#status.podIP
+#status.hostIP
+#configMapKeyRef
+#secrectKeyRef
 
