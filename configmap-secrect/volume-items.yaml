@@ -1,4 +1,4 @@
-#引用存储卷configmap资源中的部分键值数据
+#挂载引用存储卷configmap资源中的部分键值数据
 apiVersion: v1
 kind: Pod
 metadata:
