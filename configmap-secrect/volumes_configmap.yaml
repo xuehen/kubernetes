@@ -1,6 +1,6 @@
  #kubectl create configmap nginx-spec --from-file=./spec -n dev    基于目录创建configmap资源
  
-#Pod以存储卷的方式引用configmap资源 
+#Pod以存储卷的方式引用configmap资源--挂载整个存储卷 
 apiVersion: v1
 kind: Pod
 metadata:
