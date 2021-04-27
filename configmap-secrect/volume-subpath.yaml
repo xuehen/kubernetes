@@ -1,0 +1,24 @@
+#独立挂载存储卷的单个键值--保留原始目录中的数据
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-volume-demo
+  namespace: dev
+spec:
+  containers:
+  - name: nginx-server
+    image: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: ngxconf
+      mountPath: /etc/nginx/conf.d/node.conf
+      subPath: node.conf
+      readOnly: true
+    - name: ngxconf
+      mountPath: /etc/nginx/conf.d/orc.conf
+      subPath: orc.conf
+      readOnly: true
+  volumes:
+  - name: ngxconf
+    configMap:
+      name: nginx-spec
