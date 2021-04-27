@@ -17,9 +17,10 @@ spec:
   - name: ngxconf
     configMap:
       name: nginx-spec
-      items:
-      - key: node.conf
-        path: node01.conf
+      items:                #要暴露的键值数据
+      - key: node.conf      #引用configmap资源中的键   
+        path: node01.conf   # 对应的键在容器挂载目录中映射的文件名称
+        mode: 644           #文件的权限
       - key: orc.conf
         path: orc1.conf
       optional: false
