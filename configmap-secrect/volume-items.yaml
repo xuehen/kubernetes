@@ -1,0 +1,26 @@
+#引用存储卷configmap资源中的部分键值数据
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-volume-demo
+  namespace: dev
+spec:
+  containers:
+  - name: nginx-server
+    image: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: ngxconf
+      mountPath: /etc/nginx/conf.d/
+      readOnly: true
+  volumes:
+  - name: ngxconf
+    configMap:
+      name: nginx-spec
+      items:
+      - key: node.conf
+        path: node01.conf
+      - key: orc.conf
+        path: orc1.conf
+      optional: false
+
