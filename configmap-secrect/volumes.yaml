@@ -1,0 +1,26 @@
+#基于存储卷的形式同时引用congfigmap和secret
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-volume-demo
+  namespace: dev
+spec:
+  containers:
+  - name: nginx-server
+    image: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: nginxcerts
+      mountPath: /etc/nginx/certs
+      readOnly: true
+    - name: nginxconfs
+      mountPath: /etc/nginx/conf.d/
+      readOnly: true
+  volumes:
+  - name: nginxcerts
+    secret:
+      secretName: nginx-ssl-secret
+  - name: nginxconfs
+    configMap:
+      name: configdemo
+      optional: false
