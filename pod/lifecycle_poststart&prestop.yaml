@@ -1,4 +1,4 @@
-#iptables(filter,nat,manle,raw默认filter表)
+#iptables(filter,nat,mangle,raw默认filter表)
 #iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 80 
 #iptables -t nat -nL --line-number
 #iptables -D $number
