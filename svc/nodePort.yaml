@@ -1,0 +1,76 @@
+#nodePort类型的service资源，构建在clusterIP之上，节点IP:节点Port访问pod中的应用
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+  namespace: dev
+  labels:
+    app: svc
+  annotations:
+    author: bxj
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: svc
+  template:
+    metadata:
+      labels:
+        app: svc
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: demo
+        image: ikubernetes/demoapp:v1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: web
+          containerPort: 80
+          protocol: TCP
+        env:
+        - name: subject
+          value: Math
+        resources:
+          requests:
+            memory: 152Mi
+            cpu: 0.1m
+          limits:
+            memory: 1024Mi
+            cpu: 500m
+        livenessProbe:
+          httpGet:
+            path: '/livez'
+            port: 80
+            scheme: HTTP
+        readinessProbe:
+          httpGet:
+            path: '/readyz'
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo Kubernetes Practice > /tmp/k8s.log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo
+  namespace: dev
+spec:
+  type: NodePort  #指定service的类型为NodePort
+  selector:
+    app: svc
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+    #nodePort: 80   #系统分配节点监听端口
+    protocol: TCP
