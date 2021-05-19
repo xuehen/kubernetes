@@ -1,4 +1,4 @@
-#clusterIP，
+#clusterIP类型的service适用于集群内部通信
 apiVersion: apps/v1
 kind: Deployment
 metadata:
