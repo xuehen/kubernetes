@@ -1,0 +1,68 @@
+#任何原因导致的后端端点就绪状态探测失败，都会触发Endpoint对象将该端点的IP地址从subset.address字段移至subset.notReadyAddresses字段，该机制确保service对象不会将客户端请求流量调度给那些处于
+运行状态但服务未就绪（notReady）的端点
+#curl -s -X POST -d 'readyz=OK' 10.244.2.117/readyz
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: endpoint-demo
+  namespace: dev
+  labels:
+    app: endpoint
+  annotations:
+    author: bxj
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: endpoint
+  template:
+    metadata:
+      labels:
+        app: endpoint
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: endpointapp
+        image: ikubernetes/demoapp:v1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: end-port
+          hostPort: 80
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: '/livez'
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 2
+          periodSeconds: 10
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: '/readyz'
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo "$date :web is running " > /tmp/log.log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: endpoint-demo
+  namespace: dev
+spec:
+  selector:
+    app: endpoint
+  ports:
+   - name: web-port
+     port: 80
+     targetPort: 80
+  type: ClusterIP
