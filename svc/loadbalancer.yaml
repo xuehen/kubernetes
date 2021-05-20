@@ -1,0 +1,80 @@
+#service type 目前有两种，如果使用 gce 的 kubernetes，可以直接使用LoadBalancer类型，gce 会自动帮忙生成一个对外的 ip，并帮你做负载均衡
+#如果不是在 gce 平台，可以选择使用NodePort的类型，这样会在 node 里面添加一个对外的端口号，可以通过 nodeIP:nodePORT 来访问。可以自己搭建nginx 或者使用云服务商的负载均衡器来做处理。
+
+#loadbalance类型的service资源包含（NodePort和clusterIP)，如果不是GCE平台不会自动分配externalIP，生成的loadbalancer的service资源的external_IP会处于pending状态,
+#将私有集群内的服务暴露给外部用户通常使用nodeport+nginx（负载均衡）和ingress-nginx
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+  namespace: dev
+  labels:
+    app: svc
+  annotations:
+    author: bxj
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: svc
+  template:
+    metadata:
+      labels:
+        app: svc
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: demo
+        image: ikubernetes/demoapp:v1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: web
+          containerPort: 80
+          protocol: TCP
+        env:
+        - name: subject
+          value: Math
+        resources:
+          requests:
+            memory: 152Mi
+            cpu: 0.1m
+          limits:
+            memory: 1024Mi
+            cpu: 500m
+        livenessProbe:
+          httpGet:
+            path: '/livez'
+            port: 80
+            scheme: HTTP
+        readinessProbe:
+          httpGet:
+            path: '/readyz'
+            port: 80
+            scheme: HTTP
+          #initialDelaySeconds: 10
+          #periodSeconds: 10
+          #timeoutSeconds: 2
+          #failureThreshold: 3
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo Kubernetes Practice > /tmp/k8s.log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo
+  namespace: dev
+spec:
+  loadBalancerIP: 172.16.33.101 #指定外部负载均衡器的地址
+  type: LoadBalancer    
+  selector:
+    app: svc
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+    protocol: TCP
