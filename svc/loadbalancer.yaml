@@ -71,7 +71,7 @@ metadata:
 spec:
   loadBalancerIP: 172.16.33.101 #指定外部负载均衡器的地址
   type: LoadBalancer 
-  loadBalancerSourceRanges:
+  loadBalancerSourceRanges:   #限制负载均衡器的地址
   - "172.16.33.0/24"
   selector:
     app: svc
