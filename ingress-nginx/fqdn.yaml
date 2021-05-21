@@ -1,0 +1,105 @@
+#下载ingress-nginx配置文件
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/baremetal/deploy.yaml
+#修改ingress-nginx-controller的deployment的副本数为工作节点的个数，
+#基于FQDN的虚拟主机
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-2
+  namespace: dev
+  labels:
+    app: svc-2
+  annotations:
+    author: bxj
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: svc-2
+  template:
+    metadata:
+      labels:
+        app: svc-2
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: demo-2
+        image: ikubernetes/demoapp:v1.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: web-2
+          containerPort: 80
+          protocol: TCP
+        env:
+        - name: subject
+          value: Math
+        resources:
+          requests:
+            memory: 152Mi
+            cpu: 0.1m
+          limits:
+            memory: 1024Mi
+            cpu: 500m
+        livenessProbe:
+          httpGet:
+            path: '/livez'
+            port: 80
+            scheme: HTTP
+        readinessProbe:
+          httpGet:
+            path: '/readyz'
+            port: 80
+            scheme: HTTP
+          #initialDelaySeconds: 10
+          #periodSeconds: 10
+          #timeoutSeconds: 2
+          #failureThreshold: 3
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo Kubernetes Practice > /tmp/k8s.log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-2
+  namespace: dev
+spec:
+  selector:
+    app: svc-2
+  ports:
+  - name: web-2
+    port: 80
+    targetPort: 80
+    protocol: TCP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-test
+  namespace: dev
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    #- host: testing0008.eniot.io
+    - host: testing0008.eniot.io
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: demo
+            servicePort: 80
+    - host: master
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: demo-2
+            servicePort: 80
+
