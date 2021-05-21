@@ -1,0 +1,37 @@
+#指定默认后端
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-test
+  namespace: dev
+spec:
+  backend:
+     serviceName: demo
+     servicePort: 80
+#基于FQDN虚拟主机     
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-test
+  namespace: dev
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: testing0008.eniot.io
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: demo
+            servicePort: 80
+    - host: master
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: demo-2
+            servicePort: 80
+     
+
