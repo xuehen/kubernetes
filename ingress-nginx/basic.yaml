@@ -1,0 +1,34 @@
+kubernetes.io/ingress.class: "nginx"  #指定ingress-nginx-contorller的类别
+kubernetes.io/ssl-redirect: "false"  #禁用http跳转https,从而http和https的访问方式都存在，禁用跳转（配置了tls）功能只能https就行访问
+
+htpasswd  -c -b -m ./pwd mageedu mageedu    #生成认证信息用户和明码
+kubectl create secret  generic user-info --from-file=auth=./pwd -n dev #创建secret供auth-secret使用，key必须为auth
+#basic认证
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-test
+  namespace: dev
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: user-info
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+spec:
+  tls:
+  - hosts:
+    - testing0008.eniot.io
+    secretName: tls-ingress-testing008
+  rules:
+  - host: testing0008.eniot.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: demo
+          servicePort: 80
+
+#提供认证信息访问
+curl -k  -u "mageedu:mageedu"  https://testing0008.eniot.io:32648/
+iKubernetes demoapp v1.0 !! ClientIP: 10.244.2.122, ServerName: demo-f8c4b87db-jvwwq, ServerIP: 10.244.2.118!
