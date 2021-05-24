@@ -1,0 +1,29 @@
+
+#contour项目由contour控制平面和envoy数据平面组件组成，contour将部署清单中的所以资源都部署在projectcontour名称空间下，控制平面由deployment控制器编排，运行双副本，
+#通过serivce/contour为envoy提供管理服务，数据平面组件envoy由daemonset编排运行在集群中的每个节点，通过service/envoy为客户端接入ingress控制器的服务
+
+#基于k8s内置的ingress发布服务时，底层使用的时ingress-nginx还是contour控制器没有本质的区别，都可以实现对demo应用的访问
+#contour安装  wget https://raw.githubusercontent.com/projectcontour/contour/release-1.15/examples/render/contour.yaml
+#应用的访问需要借助projectcontour名称空间下的service/envoy的nodeport端口
+# cat contour-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: contour-test
+  namespace: dev
+  annotations:
+    kubernetes.io/ingress.class: "contour"
+    kubernetes.io/ssl-redirect: "false"
+spec:
+  tls:
+  - hosts:
+    - testing0008.eniot.io
+    secretName: tls-ingress-testing008
+  rules:
+  - host: testing0008.eniot.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: demo
+          servicePort: 80
