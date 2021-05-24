@@ -1,0 +1,19 @@
+#httpproxy资源
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-demo
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: testing0008.eniot.io
+    tls:
+      secretName: tls-ingress-testing008
+      minimumProtocolVersion: "tlsv1.1"
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: demo
+      port: 80
+    permitInsecure: true
