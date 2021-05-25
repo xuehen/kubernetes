@@ -1,0 +1,18 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-retry-timeout
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: testing0008.eniot.io
+  routes:
+  - timeoutPolicy:
+      response: 2s
+      idle: 5s
+    retryPolicy:
+      count: 3
+      perTryTimeout: 500ms
+    services:
+    - name: demo
+      port: 80
