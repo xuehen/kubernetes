@@ -1,0 +1,23 @@
+#负载均衡策略
+#RoundRobin: 轮询，默认策略
+#WeightedLeastRequest:加权最少的连接，但该算法仅随机选择两个健康的端点，从中挑选出负载最少的端点作为调度目标
+#Random： 从后端健康端点中随机挑选端点
+#Cookie: 粘性会话调度机制，把来自某客户端的所有请求始终调度给同一个后端端点
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-traffic-mirror
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: testing0008.eniot.io
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: demo-2
+      port: 80
+      mirror: true
+    - name: demo
+      port: 80
+      #mirror: true
