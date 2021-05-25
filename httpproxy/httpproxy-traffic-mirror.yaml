@@ -1,0 +1,18 @@
+#流量镜像，在支持蓝绿部署的场景中，用于将当前服务上的真实流量引到未发布的新版本上进行测试，但流量镜像工作于只读模式，因为其响应报文会被全部丢弃
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-traffic-mirror
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: testing0008.eniot.io
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: demo-2
+      port: 80
+    - name: demo
+      port: 80
+      mirror: true
