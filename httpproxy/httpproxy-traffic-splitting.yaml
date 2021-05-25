@@ -1,0 +1,34 @@
+#流浪切分
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-traffic-splitting
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: testing0008.eniot.io
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: demo-2
+      port: 80
+      weight: 90
+    - name: demo
+      port: 80
+      weight: 10
+
+
+[root@master contour]#  v10=0; v11=0; for i in {1..100} ; do  if curl -s http://testing0008.eniot.io:32121|grep "v1.0" > /dev/null; then let v10++; else let v11++;fi; done;
+[root@master contour]# echo "Version: 1.0: $v10  Version: 1.1: $v11"
+
+
+ v10=0; v11=0; 
+ for i in {1..100} ; 
+ do  
+    if curl -s http://testing0008.eniot.io:32121|grep "v1.0" > /dev/null; 
+    then let v10++; 
+    else let v11++;
+    fi; 
+done;
+[root@master contour]# echo "Version: 1.0: $v10  Version: 1.1: $v11"
